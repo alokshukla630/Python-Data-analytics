@@ -1,8 +1,8 @@
-from dputils.scrape import Scraper,Tag
+from dputils.scrape import Scraper, Tag
 import pandas as pd
 
 class MyScraper:
-    def __init__(self,query,page=1):
+    def __init__(self, query, page=1):
         self.query = query
         self.page = page
         self.url = f'https://www.flipkart.com/search?q={query}&page={page}'
@@ -12,31 +12,33 @@ class MyScraper:
         print(f'Collecting page {self.page}...')
         sc = Scraper(self.url)
         target = Tag(cls='_1YokD2 _3Mn1Gg')
-        items = Tag(cls='_1AtVbe col-12-12')
-        title =Tag(cls='_4rR01T')
-        price = Tag(cls='30jeq3 _1_WHN1')
-        rating = Tag('span',cls='_2_R_DZ') 
-        out = sc.get_all(target,items,name=title,price=price,rr=rating)
+        items = Tag(cls='_1AtVbE col-12-12')
+        title = Tag(cls='_4rR01T')
+        price = Tag(cls='_30jeq3 _1_WHN1')
+        rating = Tag('span', cls='_2_R_DZ')
+        out = sc.get_all(target, items, name=title, price=price, rr=rating)
         return out
-
+    
     def collect_all(self):
         while True:
             result = self.collect()
-            if len(result) == 0:
+            if len(result) >= 1:
+                self.dataset.extend(result)
+                self.page += 1
+                self.url = f'https://www.flipkart.com/search?q={self.query}&page={self.page}'
+                print(self.url)
+            else:
                 break
-            self.dataset.extend(result)
-            self.page += 1
-            self.url = f'https://www.flipkart.com/search?q={self.query}&page={self.page}'
-
-    def save(self,filename):
+    def save(self, filename):
         df = pd.DataFrame(self.dataset)
-        df.dropna(how='all',inplace = True)
-        df.to_csv(filename,index = False)
+        df.dropna(how='all', inplace=True)
+        df.to_csv(filename, index=False)
+
 
 if __name__ == '__main__':
-    sc = MyScraper('mobile')
-    #collect data
+    # create object
+    sc = MyScraper('mobiles')
+    # collect data
     sc.collect_all()
-    #Save data
-    sc.save('mobiles.csv')                   
-        
+    # save data
+    sc.save('mobiles.csv')
